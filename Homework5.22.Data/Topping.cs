@@ -2,9 +2,6 @@
 {
     public enum Toppings
     {
-        Chocolate_Chips,
-        Caramel_Drizzle,
-        Whipped_Cream,
         Pecans,
         Almonds,
         Toasted_Coconut,

@@ -4,6 +4,7 @@ using Homework5._22.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Homework5._22.Data.Migrations
 {
     [DbContext(typeof(CheesecakeDbContext))]
-    partial class CheesecakeDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231116190054_Changed Field and Class Name")]
+    partial class ChangedFieldandClassName
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -49,15 +51,11 @@ namespace Homework5._22.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
+                    b.Property<decimal>("Fee")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<string>("ItemName")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ItemType")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal>("Price")
-                        .HasPrecision(18, 6)
-                        .HasColumnType("decimal(18,6)");
 
                     b.HasKey("Id");
 
@@ -72,6 +70,9 @@ namespace Homework5._22.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
+                    b.Property<int>("CheesecakeBaseFlavor")
+                        .HasColumnType("int");
+
                     b.Property<int?>("CustomerId")
                         .HasColumnType("int");
 
@@ -84,24 +85,14 @@ namespace Homework5._22.Data.Migrations
                     b.Property<string>("SpecialRequests")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("Topping")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CustomerId");
 
                     b.ToTable("Orders");
-                });
-
-            modelBuilder.Entity("Homework5._22.Data.OrderItem", b =>
-                {
-                    b.Property<int>("ItemId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("OrderId")
-                        .HasColumnType("int");
-
-                    b.HasKey("ItemId", "OrderId");
-
-                    b.ToTable("OrderItems");
                 });
 
             modelBuilder.Entity("Homework5._22.Data.Order", b =>

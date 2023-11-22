@@ -6,11 +6,14 @@ import Form from 'react-bootstrap/Form';
 
 
 const Order = () => {
-    const [order, setOrder] = useState({ customer: { name: '', email: '', }, cheesecakeBaseFlavor: '', toppings: [], specialRequests: '', quantity: '', deliveryDate: '', total: '' })
+    const [order, setOrder] = useState({ customer: { name: '', email: '' }, specialRequests: '', quantity: '', deliveryDate: '' })
+    const [customersToppings, setCustomersToppings] = useState([])
+    const [customersBaseFlavor, setCustomersBaseFlavor] = useState({ id: '', baseFlavor: '' })
     const [toppings, setToppings] = useState([]);
     const [cheesecakeBaseFlavors, setCheesecakeBaseFlavors] = useState([])
-    const [isFormNotFilled, setIsFormNotFilled] = useState(true)
-    const [isLoading, setIsLoading] = useState(true);
+    //const [isFormNotFilled, setIsFormNotFilled] = useState(true)
+    //const [isLoading, setIsLoading] = useState(true);
+    const [total, setTotal] = useState('')
 
     useEffect(() => {
         loadData();
@@ -26,7 +29,7 @@ const Order = () => {
             !!order.customer.email &&
             +order.quantity > 0 &&
             !!order.deliveryDate &&
-            !!order.cheesecakeBaseFlavor ?
+            (!!customersBaseFlavor.id === '' || !!customersBaseFlavor.baseFlavor === '') ?
             false : true
 
 
@@ -51,57 +54,51 @@ const Order = () => {
     }
 
     const onSelectOption = (option) => {
-        const copy = { ...order }
-        copy.cheesecakeBaseFlavor = option.value
-        setOrder(copy)
+        option = { id: option.value, itemType: 'cheesecakeBaseFlavor', itemName: option.label }
+        setCustomersBaseFlavor(option)
     }
 
-    const onChecked = e => {
-        const topping = e.target.value;
-        const copy = { ...order }
-        if (e.target.checked) {
-            copy.toppings = [...copy.toppings, topping]
+    const onChecked = (topping) => {
+        let copy = [...customersToppings]
+        if (!customersToppings.includes(topping)) {
+            copy = [...copy, topping]
         }
         else {
-            copy.toppings = copy.toppings.filter(t => t !== topping)
+            copy = copy.filter(t => t.id !== topping).id
         }
-        setOrder(copy)
-    }
-
-    const removeUnderscores = (object) => {
-        if (object.includes('_')) {
-            object = object.replaceAll('_', ' ')
-        }
-        return object
-    }
-
-    const addUnderscores = (object) => {
-        if (object.includes(' ')) {
-            object = object.replaceAll(' ', '_')
-        }
-        return object
+        setCustomersToppings(copy)
     }
 
     const selectOrDeselectAll = () => {
-        const copy = { ...order };
-        if (copy.toppings.length === toppings.length) {
-            copy.toppings = []
+        let copy = [...customersToppings];
+        if (copy.length === toppings.length) {
+            copy = []
         } else {
-            copy.toppings = toppings.map(topping => removeUnderscores(topping))
+            copy = toppings.map(topping => {
+                return {
+                    topping: topping
+                }
+            })
         }
-        setOrder(copy)
+        console.log(copy)
+        setCustomersToppings(copy)
     }
 
     const baseFlavorOptions =
         cheesecakeBaseFlavors.map(f => {
             return {
-                value: f, label: removeUnderscores(f)
+                value: f.id, label: f.itemName
             }
         })
 
-    const onSubmit = () => {
-        console.log(1)
+    const onSubmit = async () => {
+        await axios.post('api/cheesecake/addorder')
     }
+
+    const getTotal = () => {
+
+    }
+
     const { customer, specialRequests, quantity, deliveryDate } = order
 
     return <>
@@ -120,30 +117,30 @@ const Order = () => {
 
                     <div className="mb-3">
                         <label className="form-label">Cheesecake Base Flavor ($49.99)</label>
-                        <Select options={baseFlavorOptions} onChange={onSelectOption} value={{ label: removeUnderscores(order.cheesecakeBaseFlavor) }} />
+                        <Select options={baseFlavorOptions} onChange={onSelectOption} value={{ label: customersBaseFlavor.itemName }} />
                     </div>
                     <div className="mb-3">
                         <div>
-                            <label className="form-label">Toppings (each topping adds an additional $3.95)</label>
-                            <Form style={{ marginBottom: 15, marginLeft: 400, marginTop: -30 }}>
+                            <label style={{fontWeight: 'bolder'}} className="form-label">Toppings</label>
+                            <Form style={{ marginBottom: 10,  marginTop: 10 }}>
                                 <Form.Check
-                                    style={{ fontWeight: 'bolder', }}
+                                    style={{ fontWeight: 'bold'}}
                                     type='checkbox'
-                                    label={order.toppings.length === toppings.length ? 'Deselect All Toppings' : 'Select All Toppings'}
+                                    label={customersToppings.length !== toppings.length ? 'Select All Toppings' : 'Deselect All Toppings'}
                                     onChange={selectOrDeselectAll}
-                                    checked={order.toppings.length === toppings.length}
+                                    checked={customersToppings.length === toppings.length}
                                 />
                             </Form>
                         </div>
                         <Form>
                             {toppings.map((topping) => (
-                                <div key={topping}>
+                                <div key={topping.id}>
                                     <Form.Check
                                         type='checkbox'
-                                        value={removeUnderscores(topping)}
-                                        label={removeUnderscores(topping)}
-                                        onChange={onChecked}
-                                        checked={order.toppings.includes(removeUnderscores(topping))}
+                                        value={topping.id}
+                                        label={topping.itemName + ` (${topping.price})`}
+                                        onChange={() => onChecked(topping)}
+                                        checked={customersToppings.map(t => t.id).includes(topping.id)}
                                     />
                                 </div>
                             ))}
@@ -170,8 +167,8 @@ const Order = () => {
                         {/* <img src="/cheesecake.jpg" className="card-img-top" alt="Cheesecake"></img> */}
                         <div className="card-body">
                             <h5 className="card-title">Your Custom Cheesecake</h5>
-                            <p className="card-text">Base: {removeUnderscores(order.cheesecakeBaseFlavor)}</p>
-                            <p className="card-text">Toppings: {order.toppings.join(', ')}</p>
+                            <p className="card-text">Base: {customersBaseFlavor.itemName}</p>
+                            <p className="card-text">Toppings: {customersToppings.map(t => t.itemName).join(', ')}</p>
                             <p className="card-text">Special Requests: {order.specialRequests}</p>
                             <p className="card-text">Quantity: {order.quantity}</p>
                             <p className="card-text">Delivery Date: {order.deliveryDate}</p>

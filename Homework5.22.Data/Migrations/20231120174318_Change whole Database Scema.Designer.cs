@@ -4,6 +4,7 @@ using Homework5._22.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Homework5._22.Data.Migrations
 {
     [DbContext(typeof(CheesecakeDbContext))]
-    partial class CheesecakeDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231120174318_Change whole Database Scema")]
+    partial class ChangewholeDatabaseScema
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -55,11 +57,15 @@ namespace Homework5._22.Data.Migrations
                     b.Property<string>("ItemType")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("OrderId")
+                        .HasColumnType("int");
+
                     b.Property<decimal>("Price")
-                        .HasPrecision(18, 6)
-                        .HasColumnType("decimal(18,6)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("OrderId");
 
                     b.ToTable("Items");
                 });
@@ -91,17 +97,12 @@ namespace Homework5._22.Data.Migrations
                     b.ToTable("Orders");
                 });
 
-            modelBuilder.Entity("Homework5._22.Data.OrderItem", b =>
+            modelBuilder.Entity("Homework5._22.Data.Item", b =>
                 {
-                    b.Property<int>("ItemId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("OrderId")
-                        .HasColumnType("int");
-
-                    b.HasKey("ItemId", "OrderId");
-
-                    b.ToTable("OrderItems");
+                    b.HasOne("Homework5._22.Data.Order", null)
+                        .WithMany("Items")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Restrict);
                 });
 
             modelBuilder.Entity("Homework5._22.Data.Order", b =>
@@ -117,6 +118,11 @@ namespace Homework5._22.Data.Migrations
             modelBuilder.Entity("Homework5._22.Data.Customer", b =>
                 {
                     b.Navigation("Orders");
+                });
+
+            modelBuilder.Entity("Homework5._22.Data.Order", b =>
+                {
+                    b.Navigation("Items");
                 });
 #pragma warning restore 612, 618
         }

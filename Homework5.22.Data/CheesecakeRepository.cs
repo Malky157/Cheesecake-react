@@ -30,9 +30,23 @@ namespace Homework5._22.Data
             return context.Orders.FirstOrDefault(o => o.Id == id);
         }
 
-        public List<CheesecakeBaseFlavors> GetAllFlavors()
+        public List<Item> GetAllFlavors()
         {
-            return new List<CheesecakeBaseFlavors> { CheesecakeBaseFlavors.Classic, CheesecakeBaseFlavors.Chocolate, CheesecakeBaseFlavors.Red_Velvet, CheesecakeBaseFlavors.Brownie };
+            var context = new CheesecakeDbContext(_connectionString);
+            return context.Items.Where(i => i.ItemType == "cheesecakeBaseFlavor").ToList();
+        }
+
+        public List<Item> GetAllToppings()
+        {
+            var context = new CheesecakeDbContext(_connectionString);
+            return context.Items.Where(i => i.ItemType == "topping").ToList();
+        }
+
+        public void AddItem(Item item)
+        {
+            var context = new CheesecakeDbContext(_connectionString);
+            context.Items.Add(item);
+            context.SaveChanges();
         }
     }
 }

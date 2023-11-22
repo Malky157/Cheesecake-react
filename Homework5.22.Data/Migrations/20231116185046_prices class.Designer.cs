@@ -4,6 +4,7 @@ using Homework5._22.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Homework5._22.Data.Migrations
 {
     [DbContext(typeof(CheesecakeDbContext))]
-    partial class CheesecakeDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231116185046_prices class")]
+    partial class pricesclass
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -41,29 +43,6 @@ namespace Homework5._22.Data.Migrations
                     b.ToTable("Customers");
                 });
 
-            modelBuilder.Entity("Homework5._22.Data.Item", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<string>("ItemName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ItemType")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal>("Price")
-                        .HasPrecision(18, 6)
-                        .HasColumnType("decimal(18,6)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Items");
-                });
-
             modelBuilder.Entity("Homework5._22.Data.Order", b =>
                 {
                     b.Property<int>("Id")
@@ -71,6 +50,9 @@ namespace Homework5._22.Data.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<int>("CheesecakeBaseFlavor")
+                        .HasColumnType("int");
 
                     b.Property<int?>("CustomerId")
                         .HasColumnType("int");
@@ -84,6 +66,12 @@ namespace Homework5._22.Data.Migrations
                     b.Property<string>("SpecialRequests")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("Topping")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Total")
+                        .HasColumnType("decimal(18,2)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CustomerId");
@@ -91,17 +79,23 @@ namespace Homework5._22.Data.Migrations
                     b.ToTable("Orders");
                 });
 
-            modelBuilder.Entity("Homework5._22.Data.OrderItem", b =>
+            modelBuilder.Entity("Homework5._22.Data.Price", b =>
                 {
-                    b.Property<int>("ItemId")
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<int>("OrderId")
-                        .HasColumnType("int");
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.HasKey("ItemId", "OrderId");
+                    b.Property<decimal>("Fee")
+                        .HasColumnType("decimal(18,2)");
 
-                    b.ToTable("OrderItems");
+                    b.Property<string>("Item")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Prices");
                 });
 
             modelBuilder.Entity("Homework5._22.Data.Order", b =>

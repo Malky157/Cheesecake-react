@@ -39,36 +39,30 @@ namespace Homework5._22.Web.Controllers
 
         [Route("getbaseflavors")]
         [HttpGet]
-        public List<string> GetCheesecakeBaseFlavors()
+        public List<Item> GetCheesecakeBaseFlavors()
         {
-            return new List<string>()
-            { CheesecakeBaseFlavors.Classic.ToString(),
-                CheesecakeBaseFlavors.Chocolate.ToString(),
-                CheesecakeBaseFlavors.Red_Velvet.ToString(),
-                CheesecakeBaseFlavors.Brownie.ToString() };
+            var repo = new CheesecakeRepository(_connectionString);
+            return repo.GetAllFlavors();
         }
 
         [Route("gettoppings")]
         [HttpGet]
-        public List<string> GetToppings()
+        public List<Item> GetToppings()
         {
-            return new List<string>(){
-        Toppings.Chocolate_Chips.ToString(),
-        Toppings.Caramel_Drizzle.ToString(),
-        Toppings.Whipped_Cream.ToString(),
-        Toppings.Pecans.ToString(),
-        Toppings.Almonds.ToString(),
-        Toppings.Toasted_Coconut.ToString(),
-        Toppings.Graham_Cracker_Crumble.ToString(),
-        Toppings.Cookie_Dough.ToString(),
-        Toppings.Mint_Chocolate_Chips.ToString(),
-        Toppings.Caramelized_Bananas.ToString(),
-        Toppings.Rainbow_Sprinkles.ToString(),
-        Toppings.Powdered_Sugar.ToString(),
-        Toppings.White_Chocolate_Shavings.ToString(),
-        Toppings.Peanut_Butter_Drizzle.ToString(),
-        Toppings.Dark_Chocolate_Drizzle.ToString()
-            };
+            var repo = new CheesecakeRepository(_connectionString);
+            return repo.GetAllToppings();
+        }
+
+        [Route("additem")]
+        [HttpPost]
+        public void AddItem(Item item)
+        {
+            if (item == null)
+            {
+                return;
+            }
+            var repo = new CheesecakeRepository(_connectionString);
+            repo.AddItem(item);
         }
     }
 }
