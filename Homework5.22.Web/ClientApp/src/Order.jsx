@@ -58,15 +58,28 @@ const Order = () => {
         setCustomersBaseFlavor(option)
     }
 
-    const onChecked = (topping) => {
+    // const onChecked = (topping) => {
+    //     let copy = [...customersToppings]
+    //     if (!customersToppings.includes(topping)) {
+    //         copy = [...copy, topping]
+    //     }
+    //     else {
+    //         copy = copy.filter(t => t.id !== topping).id
+    //     }
+    //     setCustomersToppings(copy)
+    // }
+
+    const onChecked = (e) => {
+        const topping = toppings.find(t => t.id === parseInt(e.target.value))
         let copy = [...customersToppings]
         if (!customersToppings.includes(topping)) {
             copy = [...copy, topping]
         }
         else {
-            copy = copy.filter(t => t.id !== topping).id
+            copy = copy.filter(t => t.id !== topping.id)
         }
         setCustomersToppings(copy)
+        console.log(copy)
     }
 
     const selectOrDeselectAll = () => {
@@ -75,9 +88,7 @@ const Order = () => {
             copy = []
         } else {
             copy = toppings.map(topping => {
-                return {
-                    topping: topping
-                }
+                return topping
             })
         }
         console.log(copy)
@@ -121,12 +132,12 @@ const Order = () => {
                     </div>
                     <div className="mb-3">
                         <div>
-                            <label style={{fontWeight: 'bolder'}} className="form-label">Toppings</label>
-                            <Form style={{ marginBottom: 10,  marginTop: 10 }}>
+                            <label style={{ fontWeight: 'bolder' }} className="form-label">Toppings</label>
+                            <Form style={{ marginBottom: 10, marginTop: 10 }}>
                                 <Form.Check
-                                    style={{ fontWeight: 'bold'}}
+                                    style={{ fontWeight: 'bold' }}
                                     type='checkbox'
-                                    label={customersToppings.length !== toppings.length ? 'Select All Toppings' : 'Deselect All Toppings'}
+                                    label={customersToppings.length === toppings.length ? 'Deselect All Toppings' : 'Select All Toppings'}
                                     onChange={selectOrDeselectAll}
                                     checked={customersToppings.length === toppings.length}
                                 />
@@ -139,8 +150,9 @@ const Order = () => {
                                         type='checkbox'
                                         value={topping.id}
                                         label={topping.itemName + ` (${topping.price})`}
-                                        onChange={() => onChecked(topping)}
-                                        checked={customersToppings.map(t => t.id).includes(topping.id)}
+                                        onChange={onChecked}
+                                        //checked={customersToppings.map(t => t.id).includes(topping.id)}
+                                        checked={customersToppings.includes(topping)}
                                     />
                                 </div>
                             ))}
