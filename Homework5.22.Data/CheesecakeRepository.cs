@@ -39,7 +39,7 @@ namespace Homework5._22.Data
         public List<Item> GetAllToppings()
         {
             var context = new CheesecakeDbContext(_connectionString);
-            return context.Items.Where(i => i.ItemType == "topping").ToList();
+            return context.Items.Where(i => i.ItemType == "topping").OrderBy(t => t.ItemName).ToList();
         }
 
         public void AddItem(Item item)

@@ -8,11 +8,9 @@ import Form from 'react-bootstrap/Form';
 const Order = () => {
     const [order, setOrder] = useState({ customer: { name: '', email: '' }, specialRequests: '', quantity: '', deliveryDate: '' })
     const [customersToppings, setCustomersToppings] = useState([])
-    const [customersBaseFlavor, setCustomersBaseFlavor] = useState({ id: '', baseFlavor: '' })
+    const [customersBaseFlavor, setCustomersBaseFlavor] = useState({ id: '', itemType: '', itemName: '', price: '' })
     const [toppings, setToppings] = useState([]);
     const [cheesecakeBaseFlavors, setCheesecakeBaseFlavors] = useState([])
-    //const [isFormNotFilled, setIsFormNotFilled] = useState(true)
-    //const [isLoading, setIsLoading] = useState(true);
     const [total, setTotal] = useState('')
 
     useEffect(() => {
@@ -28,8 +26,9 @@ const Order = () => {
         !!order.customer.name &&
             !!order.customer.email &&
             +order.quantity > 0 &&
+            +order.quantity % 1 === 0 &&
             !!order.deliveryDate &&
-            (!!customersBaseFlavor.id === '' || !!customersBaseFlavor.baseFlavor === '') ?
+            !!customersBaseFlavor.id ?
             false : true
 
 
@@ -54,20 +53,9 @@ const Order = () => {
     }
 
     const onSelectOption = (option) => {
-        option = { id: option.value, itemType: 'cheesecakeBaseFlavor', itemName: option.label }
-        setCustomersBaseFlavor(option)
+        const chosenFlavor = cheesecakeBaseFlavors.find(f => f.id === option.value)
+        setCustomersBaseFlavor(chosenFlavor)
     }
-
-    // const onChecked = (topping) => {
-    //     let copy = [...customersToppings]
-    //     if (!customersToppings.includes(topping)) {
-    //         copy = [...copy, topping]
-    //     }
-    //     else {
-    //         copy = copy.filter(t => t.id !== topping).id
-    //     }
-    //     setCustomersToppings(copy)
-    // }
 
     const onChecked = (e) => {
         const topping = toppings.find(t => t.id === parseInt(e.target.value))
@@ -79,7 +67,6 @@ const Order = () => {
             copy = copy.filter(t => t.id !== topping.id)
         }
         setCustomersToppings(copy)
-        console.log(copy)
     }
 
     const selectOrDeselectAll = () => {
@@ -91,14 +78,13 @@ const Order = () => {
                 return topping
             })
         }
-        console.log(copy)
         setCustomersToppings(copy)
     }
 
     const baseFlavorOptions =
         cheesecakeBaseFlavors.map(f => {
             return {
-                value: f.id, label: f.itemName
+                value: f.id, label: `${f.itemName} ($${f.price})`
             }
         })
 
@@ -127,8 +113,8 @@ const Order = () => {
                     </div>
 
                     <div className="mb-3">
-                        <label className="form-label">Cheesecake Base Flavor ($49.99)</label>
-                        <Select options={baseFlavorOptions} onChange={onSelectOption} value={{ label: customersBaseFlavor.itemName }} />
+                        <label className="form-label">Cheesecake Base Flavor</label>
+                        <Select options={baseFlavorOptions} onChange={onSelectOption} value={customersBaseFlavor.id !== '' ? { label: `${customersBaseFlavor.itemName}` } : 'select...'} />
                     </div>
                     <div className="mb-3">
                         <div>
@@ -149,9 +135,8 @@ const Order = () => {
                                     <Form.Check
                                         type='checkbox'
                                         value={topping.id}
-                                        label={topping.itemName + ` (${topping.price})`}
+                                        label={topping.itemName + `($${topping.price.toFixed(2)})`}
                                         onChange={onChecked}
-                                        //checked={customersToppings.map(t => t.id).includes(topping.id)}
                                         checked={customersToppings.includes(topping)}
                                     />
                                 </div>
@@ -165,13 +150,13 @@ const Order = () => {
                     </div>
                     <div className="mb-3">
                         <label className="form-label">Quantity</label>
-                        <input type="number" className="form-control" min="1" value={quantity} onChange={onTextChange} name="quantity" />
+                        <input type="number" className="form-control" value={quantity} onChange={onTextChange} name="quantity" />
                     </div>
                     <div className="mb-3">
                         <label className="form-label">Delivery Date</label>
                         <input type="date" className="form-control" value={deliveryDate} onChange={onTextChange} name="deliveryDate" />
                     </div>
-                    <button type="submit" disabled={formIsValid} className="btn btn-primary" onClick={onSubmit}>Submit Order</button>
+                    <button type="submit" disabled={formIsValid} className="btn btn-outline-primary" onClick={onSubmit}>Submit Order</button>
                 </div>
                 <div className="col-md-6 position-sticky" style={{ top: '2rem' }}>
                     <h2 className="mb-4">Live Preview</h2>
@@ -179,12 +164,12 @@ const Order = () => {
                         {/* <img src="/cheesecake.jpg" className="card-img-top" alt="Cheesecake"></img> */}
                         <div className="card-body">
                             <h5 className="card-title">Your Custom Cheesecake</h5>
-                            <p className="card-text">Base: {customersBaseFlavor.itemName}</p>
-                            <p className="card-text">Toppings: {customersToppings.map(t => t.itemName).join(', ')}</p>
-                            <p className="card-text">Special Requests: {order.specialRequests}</p>
-                            <p className="card-text">Quantity: {order.quantity}</p>
-                            <p className="card-text">Delivery Date: {order.deliveryDate}</p>
-                            <p className="card-text fw-bold">Total: {order.total}</p>
+                            <p className="card-text"><b>Base:</b> {customersBaseFlavor.itemName}</p>
+                            <p className="card-text"><b>Toppings:</b> {customersToppings.map(t => t.itemName).join(', ')}</p>
+                            <p className="card-text"><b>Special Requests:</b> {order.specialRequests}</p>
+                            <p className="card-text"><b>Quantity:</b> {order.quantity}</p>
+                            <p className="card-text"><b>Delivery Date:</b> {order.deliveryDate}</p>
+                            <p className="card-text fw-bold"><b>Total:</b> {total !== '' ? `$${total.toFixed(2)}` : total}</p>
                         </div>
                     </div>
                 </div>
