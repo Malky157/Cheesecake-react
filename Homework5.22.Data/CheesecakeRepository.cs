@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,10 +14,30 @@ namespace Homework5._22.Data
         {
             _connectionString = connectionString;
         }
-        public void AddOrder(Order order)
+        public void AddOrder(Order order, List<int> customerItemsIds, Customer customer)
         {
             var context = new CheesecakeDbContext(_connectionString);
+            var oldCustomer = context.Customers.FirstOrDefault(c => c.Id == customer.Id);
+            if (oldCustomer == null)
+            {
+                context.Customers.Add(customer);
+                context.SaveChanges();
+            }
+            order.CustomerId = customer.Id;
+            if(order.SpecialRequests == "")
+            {
+                order.SpecialRequests = null;
+            }
             context.Orders.Add(order);
+            context.SaveChanges();
+            context.Database.ExecuteSqlInterpolated($@"Delete OrderItems Where OrderId = {order.Id}");
+            var orderItems = new List<OrderItem>();
+            customerItemsIds.ForEach(i => orderItems.Add(new OrderItem()
+            {
+                OrderId = order.Id,
+                ItemId = i
+            }));
+            context.OrderItems.AddRange(orderItems);
             context.SaveChanges();
         }
         public List<Order> GetAllOrders()

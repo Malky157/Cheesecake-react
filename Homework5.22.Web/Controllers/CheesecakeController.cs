@@ -1,4 +1,5 @@
 ﻿using Homework5._22.Data;
+using Homework5._22.Web.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Homework5._22.Web.Controllers
@@ -15,10 +16,10 @@ namespace Homework5._22.Web.Controllers
 
         [Route("addorder")]
         [HttpPost]
-        public void AddOrder(Order order)
+        public void AddOrder(OrderVm vm)
         {
             var repo = new CheesecakeRepository(_connectionString);
-            repo.AddOrder(order);
+            repo.AddOrder(vm.OrderDetails, vm.CustomerItemsIds, vm.Customer);
         }
 
         [Route("getallorders")]

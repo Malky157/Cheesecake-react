@@ -1,17 +1,22 @@
 import React, { useEffect, useState } from "react";
 import Select from 'react-select'
 import axios from 'axios'
-import { useParams, useNavigate, json } from "react-router-dom";
 import Form from 'react-bootstrap/Form';
+import { useNavigate } from "react-router-dom";
+
+import OrderConfirmation from "./OrderConfirmation";
 
 
 const Order = () => {
-    const [order, setOrder] = useState({ customer: { name: '', email: '' }, specialRequests: '', quantity: '', deliveryDate: '' })
+    const [orderDetails, setOrderDtails] = useState({ specialRequests: '', quantity: 0, deliveryDate: '' })
+    const [customer, setCustomer] = useState({ name: '', email: '' })
     const [customersToppings, setCustomersToppings] = useState([])
     const [customersBaseFlavor, setCustomersBaseFlavor] = useState({ id: '', itemType: '', itemName: '', price: '' })
     const [toppings, setToppings] = useState([]);
     const [cheesecakeBaseFlavors, setCheesecakeBaseFlavors] = useState([])
-    const [total, setTotal] = useState('')
+    const [total, setTotal] = useState(0)
+
+    const navigate = useNavigate()
 
     useEffect(() => {
         loadData();
@@ -23,11 +28,11 @@ const Order = () => {
     }
 
     const formIsValid =
-        !!order.customer.name &&
-            !!order.customer.email &&
-            +order.quantity > 0 &&
-            +order.quantity % 1 === 0 &&
-            !!order.deliveryDate &&
+        !!customer.name &&
+            !!customer.email &&
+            +orderDetails.quantity > 0 &&
+            +orderDetails.quantity % 1 === 0 &&
+            !!orderDetails.deliveryDate &&
             !!customersBaseFlavor.id ?
             false : true
 
@@ -42,19 +47,25 @@ const Order = () => {
         setToppings(data);
     }
 
-    const onTextChange = e => {
-        const copy = { ...order }
-        if (e.target.name === 'name' || e.target.name === 'email') {
-            copy.customer[e.target.name] = e.target.value;
-        } else {
-            copy[e.target.name] = e.target.value
+    const onCustomerChange = e => {
+        const copy = { ...customer }
+        copy[e.target.name] = e.target.value
+        setCustomer(copy);
+    }
+
+    const onOrderDetailsChange = e => {
+        const copy = { ...orderDetails }
+        copy[e.target.name] = e.target.value
+        setOrderDtails(copy);
+        if (e.target.name === 'quantity') {
+            getTotal();
         }
-        setOrder(copy);
     }
 
     const onSelectOption = (option) => {
         const chosenFlavor = cheesecakeBaseFlavors.find(f => f.id === option.value)
         setCustomersBaseFlavor(chosenFlavor)
+        getTotal()
     }
 
     const onChecked = (e) => {
@@ -67,6 +78,7 @@ const Order = () => {
             copy = copy.filter(t => t.id !== topping.id)
         }
         setCustomersToppings(copy)
+        getTotal()
     }
 
     const selectOrDeselectAll = () => {
@@ -79,24 +91,38 @@ const Order = () => {
             })
         }
         setCustomersToppings(copy)
+        getTotal();
     }
 
     const baseFlavorOptions =
         cheesecakeBaseFlavors.map(f => {
             return {
-                value: f.id, label: `${f.itemName} ($${f.price})`
+                value: f.id, label: `${f.itemName}($${f.price})`
             }
         })
 
     const onSubmit = async () => {
-        await axios.post('api/cheesecake/addorder')
+        const customerItemsIds = [customersBaseFlavor.id, ...customersToppings.map(t => t.id)]
+        await axios.post('api/cheesecake/addorder', { customer, orderDetails, customerItemsIds })
+        navigate('/orderconfirmation')
     }
 
     const getTotal = () => {
-
+        console.log(1)
+        let sum = 0;
+        if (customersBaseFlavor.price) {
+            sum += customersBaseFlavor.price
+        }
+        if (customersToppings.length > 0) {
+            sum += customersToppings.map(t => t.price).reduce((total, amount) => total + amount)
+        }
+        if (quantity > 0) {
+            sum += sum * quantity
+        }
+        setTotal(sum);
     }
 
-    const { customer, specialRequests, quantity, deliveryDate } = order
+    const { specialRequests, quantity, deliveryDate } = orderDetails
 
     return <>
         <div className="container" style={{ marginTop: 80 }}>
@@ -105,11 +131,11 @@ const Order = () => {
                 <div className="col-md-6">
                     <div className="mb-3">
                         <label className="form-label">Name</label>
-                        <input type="text" className="form-control" value={customer.name} name="name" onChange={onTextChange} />
+                        <input type="text" className="form-control" value={customer.name} name="name" onChange={onCustomerChange} />
                     </div>
                     <div className="mb-3">
                         <label className="form-label">Email</label>
-                        <input type="email" className="form-control" value={customer.email} name="email" onChange={onTextChange} />
+                        <input type="email" className="form-control" value={customer.email} name="email" onChange={onCustomerChange} />
                     </div>
 
                     <div className="mb-3">
@@ -145,16 +171,16 @@ const Order = () => {
                     </div>
                     <div className="mb-3">
                         <label className="form-label">Special Requests</label>
-                        <textarea className="form-control" rows="3" onChange={onTextChange} name="specialRequests" value={specialRequests}>
+                        <textarea className="form-control" rows="3" onChange={onOrderDetailsChange} name="specialRequests" value={specialRequests}>
                         </textarea>
                     </div>
                     <div className="mb-3">
                         <label className="form-label">Quantity</label>
-                        <input type="number" className="form-control" value={quantity} onChange={onTextChange} name="quantity" />
+                        <input type="number" className="form-control" value={quantity} onChange={onOrderDetailsChange} name="quantity" />
                     </div>
                     <div className="mb-3">
                         <label className="form-label">Delivery Date</label>
-                        <input type="date" className="form-control" value={deliveryDate} onChange={onTextChange} name="deliveryDate" />
+                        <input type="date" className="form-control" value={deliveryDate} onChange={onOrderDetailsChange} name="deliveryDate" />
                     </div>
                     <button type="submit" disabled={formIsValid} className="btn btn-outline-primary" onClick={onSubmit}>Submit Order</button>
                 </div>
@@ -166,9 +192,9 @@ const Order = () => {
                             <h5 className="card-title">Your Custom Cheesecake</h5>
                             <p className="card-text"><b>Base:</b> {customersBaseFlavor.itemName}</p>
                             <p className="card-text"><b>Toppings:</b> {customersToppings.map(t => t.itemName).join(', ')}</p>
-                            <p className="card-text"><b>Special Requests:</b> {order.specialRequests}</p>
-                            <p className="card-text"><b>Quantity:</b> {order.quantity}</p>
-                            <p className="card-text"><b>Delivery Date:</b> {order.deliveryDate}</p>
+                            <p className="card-text"><b>Special Requests:</b> {specialRequests}</p>
+                            <p className="card-text"><b>Quantity:</b> {quantity}</p>
+                            <p className="card-text"><b>Delivery Date:</b> {deliveryDate}</p>
                             <p className="card-text fw-bold"><b>Total:</b> {total !== '' ? `$${total.toFixed(2)}` : total}</p>
                         </div>
                     </div>

@@ -24,13 +24,18 @@ const Layout = (props) => {
                                         Order
                                     </Link>
                                 </li>
+                                <li className="nav-item">
+                                    <Link to='/vieworders' className='nav-link text-light'>
+                                        View Orders
+                                    </Link>
+                                </li>
                             </ul>
                         </div>
                     </div>
                 </nav>
             </header>
 
-            <div className="container" style={{ marginTop: 60}}>
+            <div className="container" style={{ marginTop: 60 }}>
                 {props.children}
             </div>
 
