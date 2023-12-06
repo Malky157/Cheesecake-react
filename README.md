@@ -16,4 +16,4 @@ and change the Data Source to your SQL server name.
 Then on the command line you can go to the web project folder `Cheesecake-react.Web/`
 and run `dotnet watch run` 
 
-**PLEASE NOTE:** THIS PROJECT IS INCOMPLETE, IF YOU CHOOSE TO INSTALL AND RUN THERE WILL BE BUGS!
+**PLEASE NOTE:** THIS PROJECT IS INCOMPLETE!
